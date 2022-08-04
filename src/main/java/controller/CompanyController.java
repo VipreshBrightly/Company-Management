@@ -1,10 +1,12 @@
 package controller;
 import entity.Company;
-import org.springframework.beans.factory.annotation.Autowired;
+//import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import services.CompanyServicesInterface;
+
+import javax.inject.Inject;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
@@ -14,7 +16,8 @@ import java.util.Optional;
 
 @RestController
 public class CompanyController {
-    @Autowired
+    //@Autowired
+    @Inject
     public CompanyServicesInterface comServices;
 
 //    @Path("/Company")
@@ -31,13 +34,14 @@ public class CompanyController {
         return ResponseEntity.of(Optional.of(companyList));
     }
 
-    @Path("/Company/{id}")
     @GET
+    @Path("/Company/{id}")
     @Produces(MediaType.APPLICATION_JSON)
     public ResponseEntity<Company> getMappingByIdClassification(@PathVariable("id") int id) {
         Company company = this.comServices.getCompanyById(id);
 
-        if (company == null) {
+        if (company == null)
+        {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
 
@@ -53,4 +57,27 @@ public class CompanyController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
+
+    @DeleteMapping("/Company/{id}")
+    public ResponseEntity<Void> delCompany(@PathVariable("id") int id) {
+        try {
+            this.comServices.deleteCompany(id);
+            return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    @PutMapping("/Company/{id}")
+    public ResponseEntity<Company> putCompany(@RequestBody Company com, @PathVariable("id") int id) {
+        try {
+            this.comServices.updateCompany(com, id);
+            return ResponseEntity.of(Optional.of(com));
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+    //
 }
